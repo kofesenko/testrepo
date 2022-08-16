@@ -22,6 +22,25 @@ provider "aws" {
 
 data "aws_availability_zones" "all" {}
 
+data "aws_ami" "ubuntu" {
+    most_recent = true
+
+    filter {
+        name = "name"
+        values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+    }
+    filter {
+        name   = "virtualization-type"
+        values = ["hvm"]
+    }
+    filter {
+        name   = "architecture"
+        values = ["x86_64"]
+    }
+ 
+    owners = ["099720109477"] # Canonical official
+
+}
 
 resource "aws_autoscaling_group" "example" {
   launch_configuration = aws_launch_configuration.example.id
@@ -41,8 +60,8 @@ resource "aws_autoscaling_group" "example" {
 }
 
 resource "aws_launch_configuration" "example" {
-  # Ubuntu Server 18.04 LTS (HVM), SSD Volume Type in us-east-2
-  image_id        = "ami-0c55b159cbfafe1f0"
+  # Ubuntu Server 18.04 LTS (HVM), SSD Volume Type in eu-west-1 "ami-07b63aa1cfd3bc3a5"
+  image_id        = data.aws_ami.ubuntu.id
   instance_type   = "t2.micro"
   security_groups = [aws_security_group.instance.id]
 
